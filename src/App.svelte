@@ -1,25 +1,45 @@
 <script lang="ts">
   import Container from "./component/container.svelte";
+  import Navbar from "./component/navbar.svelte";
 
   let value = "";
   let videoUrl = "";
   let errorMessage = "";
 
+  let inputElement: HTMLInputElement;
+
   function submit() {
     videoUrl = value;
+
+    inputElement.blur();
   }
 
   function clear() {
     value = "";
+    inputElement.focus();
+  }
+
+  function close() {
+    videoUrl = "";
   }
 </script>
 
-<main>
+<Navbar />
+
+<main class="grid place-items-center mt-4">
   <Container>
-    <form on:submit|preventDefault={submit}>
-      <label for="url">Enter media url</label>
-      <div class="input">
-        <input id="url" bind:value type="url" />
+    <form on:submit|preventDefault={submit} class="flex flex-col gap-4 w-full">
+      <label for="url" class="text-4xl">Enter media url</label>
+      <div
+        class="h-16 w-full flex gap-2 items-center bg-gray-800 p-4 rounded-xl"
+      >
+        <input
+          id="url"
+          bind:value
+          type="url"
+          bind:this={inputElement}
+          class=" w-full h-full outline-none bg-transparent"
+        />
 
         {#if value.length != 0}
           <button type="button" on:click={clear}>
@@ -47,81 +67,26 @@
     </form>
 
     {#if videoUrl.length != 0}
-      <div class="video-box">
-        <video src={videoUrl} autoplay={true} controls={true} />
+      <div class="aspect-video w-full h-full">
+        <div class="mb-2 flex justify-end">
+          <button
+            on:click={close}
+            class="hover:border-white border-b-2 border-transparent"
+            >close</button
+          >
+        </div>
+
+        <div>
+          <video
+            src={videoUrl}
+            autoplay={false}
+            controls={true}
+            class="w-full h-full"
+          >
+            <track kind="captions" />
+          </video>
+        </div>
       </div>
     {/if}
   </Container>
 </main>
-
-<style>
-  main {
-    display: flex;
-    width: 100%;
-    justify-content: center;
-
-    margin-top: 10rem;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
-  }
-
-  label {
-    font-size: 3rem;
-    font-weight: 500;
-  }
-
-  .input {
-    width: 100%;
-    background-color: #404040;
-    border-radius: 10px;
-
-    font-size: 2rem;
-    display: flex;
-  }
-
-  input {
-    background-color: transparent;
-    border: none;
-    color: white;
-    outline: none;
-    font-family: var(--ft);
-    width: 100%;
-    height: 3rem;
-    padding: 1rem;
-    font-size: 1rem;
-  }
-
-  .input button {
-    border: none;
-    background-color: transparent;
-
-    cursor: pointer;
-
-    /* width: 100%; */
-  }
-
-  .video-box {
-    margin-top: 1rem;
-  }
-
-  video {
-    width: 100%;
-    height: 100%;
-
-    aspect-ratio: 16/9;
-  }
-
-  .error_message:empty {
-    display: none;
-  }
-
-  .error_message {
-    color: red;
-    text-align: end;
-  }
-</style>
