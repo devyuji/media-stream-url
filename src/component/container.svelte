@@ -1,3 +1,3 @@
-<div class="w-11/12 sm:w-[40rem]">
+<div class="w-full sm:w-[40rem] p-4">
   <slot />
 </div>
