@@ -7,6 +7,7 @@
   let videoUrl = "";
   let errorMessage = "";
   let videoStatus: "loading" | "ready" | "error" = "loading";
+  let copy: "Copy link" | "copied!" = "Copy link";
 
   let inputElement: HTMLInputElement;
   let videoElement: HTMLVideoElement;
@@ -31,6 +32,10 @@
 
     videoStatus = "loading";
     inputElement.blur();
+
+    setTimeout(() => {
+      videoElement.scrollTo();
+    }, 1);
   }
 
   async function pasteFromClipboard() {
@@ -44,6 +49,10 @@
     let url = `${window.location.origin}?url=${encodeURIComponent(videoUrl)}`;
 
     await navigator.clipboard.writeText(url);
+
+    copy = "copied!";
+
+    setTimeout(() => (copy = "Copy link"), 3000);
   }
 
   function clear() {
@@ -51,13 +60,45 @@
     inputElement.focus();
   }
 
-  function close() {
-    videoUrl = "";
-    errorMessage = "";
-    videoStatus = "loading";
-  }
+  function onKeyDown(e: KeyboardEvent) {
+    if (
+      videoStatus === "loading" ||
+      videoStatus == "error" ||
+      document.activeElement === inputElement
+    )
+      return;
 
-  function onKeyDown(e: any) {}
+    console.log(e);
+
+    switch (e.key) {
+      case "K":
+      case "k":
+        if (videoElement.paused) {
+          videoElement.play();
+        } else {
+          videoElement.pause();
+        }
+        break;
+
+      case "F":
+      case "f":
+        if (document.fullscreenElement === videoElement) {
+          document.exitFullscreen();
+        } else {
+          videoElement.requestFullscreen();
+        }
+        break;
+
+      case "M":
+      case "m":
+        if (videoElement.muted) {
+          videoElement.muted = false;
+        } else {
+          videoElement.muted = true;
+        }
+        break;
+    }
+  }
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -126,13 +167,7 @@
           <button
             on:click={copyLink}
             class="hover:border-white border-b-2 border-transparent"
-            >copy link</button
-          >
-
-          <button
-            on:click={close}
-            class="hover:border-white border-b-2 border-transparent"
-            >close</button
+            >{copy}</button
           >
         </div>
 
@@ -150,6 +185,9 @@
                 videoStatus = "ready";
               }
             }}
+            on:keydown={(e) => {
+              e.preventDefault();
+            }}
             on:error={() => {
               errorMessage = "Check the video url. Unable to play the video";
               videoStatus = "error";
@@ -161,7 +199,7 @@
 
           {#if videoStatus === "loading"}
             <div
-              class="absolute w-full h-full bg-black/70 top-0 left-0 right-0 grid place-items-center"
+              class="absolute w-full h-full bg-black/80 top-0 left-0 right-0 grid place-items-center"
             >
               <div class="flex items-center gap-2">
                 <svg
