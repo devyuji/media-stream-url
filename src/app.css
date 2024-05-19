@@ -13,8 +13,14 @@ html {
 }
 
 body {
-  background-color: #000000;
-  color: #f4f4f6;
   font-family: var(--ft);
 }
 
+#app {
+  --tw-opacity: 1;
+  background-color: rgb(24 24 27 / var(--tw-opacity));
+  min-height: 100svh;
+  color: rgb(229 231 235 / var(--tw-opacity));
+  display: flex;
+  flex-direction: column;
+}
