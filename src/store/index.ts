@@ -1,33 +1,33 @@
 import { writable } from "svelte/store";
 
 interface videoProps {
-  status: "loading" | "error" | "playing" | "not-ready";
   source: string;
+  isEmpty: boolean;
 }
 
 function createVideoUrl() {
   const { subscribe, set, update } = writable<videoProps>({
-    status: "not-ready",
     source: "",
+    isEmpty: true,
   });
 
   function clear() {
     set({
-      status: "not-ready",
       source: "",
+      isEmpty: false,
     });
   }
 
   function newUrl(url: string) {
     update((_) => {
       return {
-        status: "loading",
         source: url,
+        isEmpty: false,
       };
     });
   }
 
-  return { subscribe, clear, newUrl, set };
+  return { subscribe, clear, newUrl };
 }
 
 export const video = createVideoUrl();

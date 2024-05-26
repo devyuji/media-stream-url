@@ -4,14 +4,11 @@
   import Navbar from "./component/navbar.svelte";
   import VideoPlayer from "./component/videoPlayer.svelte";
   import { video } from "./store/index";
-  import { string } from "yup";
 
   let errorMessage = "";
 
   let value = "";
   let inputElement: HTMLInputElement;
-
-  let valueSchema = string().required().trim().url();
 
   onMount(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -20,30 +17,34 @@
     if (url !== null) {
       inputElement.focus();
 
-      validUrl(url);
+      if (!validUrl(url)) {
+        errorMessage = "not a valid url";
+        return;
+      }
+
+      value = url;
+      video.newUrl(url);
     }
   });
 
-  async function validUrl(string: string) {
-    if (!(await valueSchema.isValid(string))) {
-      errorMessage = "not a valid url";
-      return;
-    }
+  function validUrl(url: string) {
+    try {
+      new URL(url);
 
-    errorMessage = "";
-    value = string;
-    $video.source = string;
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
-  async function submit() {
-    if (!(await valueSchema.isValid(value))) {
+  function submit() {
+    if (!validUrl(value)) {
       errorMessage = "not a valid url";
       return;
     }
 
     errorMessage = "";
-    $video.source = value;
-
+    video.newUrl(value);
     inputElement.blur();
   }
 

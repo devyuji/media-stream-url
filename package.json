@@ -20,8 +20,5 @@
     "tslib": "^2.6.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.11"
-  },
-  "dependencies": {
-    "yup": "^1.4.0"
   }
 }

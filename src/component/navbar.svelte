@@ -3,10 +3,19 @@
   import Container from "./container.svelte";
 
   async function share() {
+    if ($video.isEmpty) {
+      await navigator.share({
+        title: "play video online",
+        url: window.location.origin,
+      });
+
+      return;
+    }
+
     let url = `${window.location.origin}?url=${encodeURIComponent($video.source)}`;
 
     await navigator.share({
-      title: "video",
+      title: "play video online",
       url,
     });
   }
