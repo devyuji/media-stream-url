@@ -1,21 +1,20 @@
 <script lang="ts">
-  import { video } from "../store";
+  import video from "../state/video.svelte";
 
-  let videoElement: HTMLVideoElement;
-
-  let isPlaying = false;
+  let videoElement = $state<HTMLVideoElement>();
+  let isPlaying = $state(false);
 
   async function keyUps(e: KeyboardEvent) {
-    if (videoElement.readyState < 3) {
+    if (videoElement!.readyState < 3 || video.state.loading) {
       return;
     }
 
     switch (e.code) {
       case "KeyK":
         if (isPlaying) {
-          videoElement.pause();
+          videoElement!.pause();
         } else {
-          await videoElement.play();
+          await videoElement!.play();
         }
         break;
 
@@ -23,7 +22,7 @@
         if (window.innerHeight === screen.height) {
           document.exitFullscreen();
         } else {
-          await videoElement.requestFullscreen();
+          await videoElement!.requestFullscreen();
         }
         break;
 
@@ -35,15 +34,16 @@
 
 <svelte:window on:keyup={keyUps} />
 
-<div class="w-full aspect-video my-6 bg-black">
+<div class="w-full max-h-96 aspect-video my-6 bg-black">
   <video
     bind:this={videoElement}
-    src={$video.source}
+    src={video.state.videoUrl}
     controls={true}
     autoplay={false}
-    on:play={() => (isPlaying = true)}
-    on:pause={() => (isPlaying = false)}
+    onplay={() => (isPlaying = true)}
+    onpause={() => (isPlaying = false)}
     class="w-full h-full"
   >
+    <track kind="captions" />
   </video>
 </div>

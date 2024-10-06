@@ -3,11 +3,10 @@
   import Container from "./component/container.svelte";
   import Navbar from "./component/navbar.svelte";
   import VideoPlayer from "./component/videoPlayer.svelte";
-  import { video } from "./store/index";
+  import video from "./state/video.svelte";
 
-  let errorMessage = "";
+  let errorMessage = $state("");
 
-  let value = "";
   let inputElement: HTMLInputElement;
 
   onMount(() => {
@@ -22,8 +21,7 @@
         return;
       }
 
-      value = url;
-      video.newUrl(url);
+      video.update({ videoUrl: url, start: true, value: url });
     }
   });
 
@@ -37,14 +35,17 @@
     }
   }
 
-  function submit() {
-    if (!validUrl(value)) {
+  function submit(e: SubmitEvent) {
+    e.preventDefault();
+
+    if (!validUrl(video.state.value)) {
       errorMessage = "not a valid url";
       return;
     }
 
+    video.update({ videoUrl: video.state.value, start: true });
+
     errorMessage = "";
-    video.newUrl(value);
     inputElement.blur();
   }
 
@@ -52,40 +53,38 @@
     try {
       const text = await navigator.clipboard.readText();
 
-      value = text;
+      video.update({ value: text });
       inputElement.focus();
     } catch (err) {
       errorMessage = "Paste manually";
     }
   }
 
-  function clear() {
-    value = "";
-  }
+  function reset() {}
 </script>
 
 <Navbar />
 
 <main class="grid place-items-center mt-2">
   <Container>
-    <form on:submit|preventDefault={submit} class="flex flex-col gap-8 w-full">
+    <form onsubmit={submit} onreset={reset} class="flex flex-col gap-8 w-full">
       <label for="url" class="text-4xl">Enter video url</label>
       <div
         class="h-16 w-full flex gap-2 items-center bg-zinc-800 p-4 rounded-xl"
       >
         <input
-          bind:value
+          bind:value={video.state.value}
           id="url"
           type="url"
           bind:this={inputElement}
           class=" w-full h-full outline-none bg-transparent"
         />
 
-        {#if value.length != 0}
+        {#if video.state.value.length != 0}
           <button
-            on:click={clear}
-            type="button"
+            type="reset"
             class="focus-visible:text-yellow-500 hover:text-yellow-500"
+            aria-label="reset"
           >
             <svg
               viewBox="0 0 24 24"
@@ -117,7 +116,7 @@
       <div class="flex justify-end items-center gap-4">
         <button
           type="button"
-          on:click={pasteFromClipboard}
+          onclick={pasteFromClipboard}
           class="hover:text-yellow-500 focus-visible:text-yellow-500 flex items-center gap-2"
         >
           <svg
@@ -136,9 +135,8 @@
           > Paste
         </button>
 
-        {#if value.length != 0}
+        {#if video.state.value.length != 0}
           <button
-            on:click={submit}
             class="flex items-center gap-2 hover:text-yellow-500 focus-visible:text-yellow-500"
             type="submit"
           >
@@ -159,7 +157,7 @@
       </div>
     </form>
 
-    {#if $video.source.length !== 0}
+    {#if video.state.start}
       <VideoPlayer />
     {/if}
   </Container>

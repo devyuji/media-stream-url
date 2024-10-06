@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { video } from "../store";
+  import video from "../state/video.svelte";
   import Container from "./container.svelte";
 
   async function share() {
-    if ($video.isEmpty) {
+    if (video.state.value.length !== 0) {
       await navigator.share({
         title: "play video online",
         url: window.location.origin,
@@ -12,7 +12,7 @@
       return;
     }
 
-    let url = `${window.location.origin}?url=${encodeURIComponent($video.source)}`;
+    let url = `${window.location.origin}?url=${encodeURIComponent(video.state.videoUrl)}`;
 
     await navigator.share({
       title: "play video online",
