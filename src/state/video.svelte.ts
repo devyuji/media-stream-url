@@ -1,15 +1,12 @@
 interface VideoType {
-  loading: boolean;
-  videoUrl: string;
-  value: string;
+  url: string;
   start: boolean;
 }
 
 class Video {
   state = $state<VideoType>({
-    loading: false,
-    videoUrl: "",
-    value: "",
+    url: "",
+
     start: false,
   });
 

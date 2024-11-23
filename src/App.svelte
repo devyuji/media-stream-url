@@ -6,6 +6,8 @@
   import video from "./state/video.svelte";
 
   let errorMessage = $state("");
+  let value = $state("");
+  let isValueEmpty = $derived(value.trim().length === 0);
 
   let inputElement: HTMLInputElement;
 
@@ -21,7 +23,8 @@
         return;
       }
 
-      video.update({ videoUrl: url, start: true, value: url });
+      value = url;
+      video.update({ url: url, start: true });
     }
   });
 
@@ -38,29 +41,34 @@
   function submit(e: SubmitEvent) {
     e.preventDefault();
 
-    if (!validUrl(video.state.value)) {
+    if (!validUrl(value)) {
       errorMessage = "not a valid url";
       return;
     }
 
-    video.update({ videoUrl: video.state.value, start: true });
+    video.update({ url: value, start: true });
 
     errorMessage = "";
-    inputElement.blur();
   }
 
   async function pasteFromClipboard() {
     try {
       const text = await navigator.clipboard.readText();
 
-      video.update({ value: text });
+      value = text;
       inputElement.focus();
     } catch (err) {
       errorMessage = "Paste manually";
     }
   }
 
-  function reset() {}
+  function reset(e: any) {
+    e.preventDefault();
+    value = "";
+    errorMessage = "";
+
+    inputElement.focus();
+  }
 </script>
 
 <Navbar />
@@ -70,17 +78,18 @@
     <form onsubmit={submit} onreset={reset} class="flex flex-col gap-8 w-full">
       <label for="url" class="text-4xl">Enter video url</label>
       <div
-        class="h-16 w-full flex gap-2 items-center bg-zinc-800 p-4 rounded-xl"
+        class="h-16 w-full flex gap-2 items-center bg-zinc-800 p-4 rounded-lg focus-within:border-yellow-800 border-2 border-transparent"
       >
         <input
-          bind:value={video.state.value}
+          bind:value
           id="url"
           type="url"
           bind:this={inputElement}
           class=" w-full h-full outline-none bg-transparent"
+          required
         />
 
-        {#if video.state.value.length != 0}
+        {#if !isValueEmpty}
           <button
             type="reset"
             class="focus-visible:text-yellow-500 hover:text-yellow-500"
@@ -95,7 +104,6 @@
               fill="none"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="css-i6dzq1"
               ><line x1="18" y1="6" x2="6" y2="18"></line><line
                 x1="6"
                 y1="6"
@@ -107,7 +115,7 @@
         {/if}
       </div>
 
-      {#if errorMessage.length !== 0}
+      {#if errorMessage}
         <div>
           <p class="text-red-500">{errorMessage}</p>
         </div>
@@ -135,25 +143,23 @@
           > Paste
         </button>
 
-        {#if video.state.value.length != 0}
-          <button
-            class="flex items-center gap-2 hover:text-yellow-500 focus-visible:text-yellow-500"
-            type="submit"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              stroke="currentColor"
-              stroke-width="2"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="css-i6dzq1"
-              ><polygon points="5 3 19 12 5 21 5 3"></polygon></svg
-            > Play
-          </button>
-        {/if}
+        <button
+          class="flex items-center gap-2 hover:text-yellow-500 focus-visible:text-yellow-500 disabled:pointer-events-none disabled:text-gray-600 disabled:cursor-not-allowed"
+          type="submit"
+          disabled={isValueEmpty}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><polygon points="5 3 19 12 5 21 5 3"></polygon></svg
+          > Play
+        </button>
       </div>
     </form>
 
@@ -162,3 +168,9 @@
     {/if}
   </Container>
 </main>
+
+<style>
+  button:focus-within {
+    outline: none;
+  }
+</style>
