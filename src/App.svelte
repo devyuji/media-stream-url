@@ -85,7 +85,7 @@
           id="url"
           type="url"
           bind:this={inputElement}
-          class=" w-full h-full outline-none bg-transparent"
+          class=" w-full h-full outline-hidden bg-transparent"
           required
         />
 
