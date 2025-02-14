@@ -1,6 +1,12 @@
 <script lang="ts">
   import video from "../state/video.svelte";
 
+  interface Props {
+    useNativePlayer: boolean;
+  }
+
+  let { useNativePlayer }: Props = $props();
+
   let isPlaying = $state(false);
   let loading = $state(true);
   let isControllerShowing = $state(true);
@@ -74,18 +80,46 @@
   }
 
   function hideController() {
-    console.log("here");
-
     controllerTimeout = setTimeout(() => {
       isControllerShowing = false;
     }, CONTROLLER_TIMEOUT);
   }
 
   async function fullScreen() {
-    if (window.innerHeight === screen.height) {
-      document.exitFullscreen();
-    } else {
-      await videContainerEle!.requestFullscreen();
+    try {
+      // Check if currently in fullscreen
+      const isFullscreen =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+
+      if (isFullscreen) {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
+      } else {
+        // Enter fullscreen
+        const element = videContainerEle;
+        if (element.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+          await element.webkitRequestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+          await element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+          await element.msRequestFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error("Fullscreen error:", error);
     }
   }
 
@@ -148,9 +182,11 @@
 
     updateCurrentTime(calculateTime);
     updateProgressBar();
+
+    if (!isPlaying) videoElement.play();
   }
 
-  function handleMouse(e: MouseEvent) {
+  function handleMouse() {
     if (loading || !isPlaying) return;
 
     showContoller();
@@ -170,7 +206,7 @@
 <!-- svelte-ignore a11y_media_has_caption -->
 
 <div
-  class="w-full aspect-video my-6 bg-black"
+  class="w-full min-w-96 sm:min-w-min aspect-video my-6 bg-black"
   bind:this={videContainerEle}
   onclick={toggleController}
   onmousemove={handleMouse}
@@ -179,7 +215,7 @@
     <video
       bind:this={videoElement}
       src={video.state.url}
-      controls={false}
+      controls={useNativePlayer}
       autoplay={false}
       onplay={() => (isPlaying = true)}
       onpause={() => (isPlaying = false)}
@@ -213,7 +249,7 @@
 
     <!-- controller  -->
     <div
-      class={`absolute bg-black/50 w-full p-3 h-full flex flex-col justify-end top-0 left-0 right-0 z-10 transition-opacity duration-1000  ${isControllerShowing ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} `}
+      class={`absolute bg-black/50 w-full p-3 h-full flex flex-col justify-end top-0 left-0 right-0 z-10 transition-opacity duration-1000 ${useNativePlayer ? "hidden" : ""}  ${isControllerShowing ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} `}
     >
       <!-- controller buttons top  -->
       <div

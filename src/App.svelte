@@ -4,6 +4,7 @@
   import Navbar from "./component/navbar.svelte";
   import VideoPlayer from "./component/videoPlayer.svelte";
   import video from "./state/video.svelte";
+  import setting from "./state/settings.svelte";
 
   let errorMessage = $state("");
   let value = $state("");
@@ -14,6 +15,8 @@
   onMount(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const url = urlParams.get("url");
+
+    init();
 
     if (url !== null) {
       inputElement.focus();
@@ -27,6 +30,15 @@
       video.update({ url: url, start: true });
     }
   });
+
+  function init() {
+    // settings
+    const settings = localStorage.getItem("settings");
+
+    if (!setting) return;
+
+    setting.update(JSON.parse(settings!));
+  }
 
   function validUrl(url: string) {
     try {
@@ -164,13 +176,7 @@
     </form>
 
     {#if video.state.start}
-      <VideoPlayer />
+      <VideoPlayer useNativePlayer={setting.state.useNativePlayer} />
     {/if}
   </Container>
 </main>
-
-<style>
-  button:focus-within {
-    outline: none;
-  }
-</style>
