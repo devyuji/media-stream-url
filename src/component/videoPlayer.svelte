@@ -141,7 +141,7 @@
     if (loading) return;
 
     if (isPlaying) videoElement.pause();
-    else videoElement.play();
+    else await videoElement.play();
   }
 
   function formatTime(timeInSeconds: number) {
@@ -169,6 +169,7 @@
     isControllerShowing = true;
 
     updateCurrentTime(videoElement.currentTime + 10);
+    updateProgressBar();
   }
 
   function seekBackward() {
@@ -176,6 +177,7 @@
     isControllerShowing = true;
 
     updateCurrentTime(videoElement.currentTime - 10);
+    updateProgressBar();
   }
 
   function updateProgressBar() {
