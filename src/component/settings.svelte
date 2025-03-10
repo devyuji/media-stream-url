@@ -15,7 +15,7 @@
     tabindex="0"
     transition:fly={{ duration: 250, y: 10 }}
     onclick={(e) => e.stopPropagation()}
-    class="p-6 rounded-lg bg-gray-950 sm:w-120 w-9/10 grid gap-6"
+    class="p-6 rounded-lg bg-gray-800 sm:w-120 w-9/10 grid gap-6"
   >
     <div class="flex justify-end">
       <button

@@ -16,6 +16,7 @@
     current: "00:00",
   });
   let progress = $state("0%");
+  let muted = $state(false);
 
   let controllerTimeout: any;
 
@@ -23,7 +24,7 @@
   let videContainerEle: HTMLDivElement;
   let progressContainerEle: HTMLDivElement;
 
-  const CONTROLLER_TIMEOUT = 3000;
+  const CONTROLLER_TIMEOUT = 2000;
 
   // responsible for showing controller when video is paused
   $effect(() => {
@@ -38,6 +39,16 @@
 
     hideController();
   });
+
+  function mute() {
+    if (muted) {
+      videoElement.muted = false;
+      muted = false;
+      return;
+    }
+    videoElement.muted = true;
+    muted = true;
+  }
 
   async function keyUps(e: KeyboardEvent) {
     if (videoElement!.readyState < 3) {
@@ -62,6 +73,9 @@
         seekForward();
         break;
 
+      case "KeyM":
+        mute();
+        break;
       default:
         break;
     }
@@ -182,8 +196,6 @@
 
     updateCurrentTime(calculateTime);
     updateProgressBar();
-
-    if (!isPlaying) videoElement.play();
   }
 
   function handleMouse() {
@@ -249,7 +261,7 @@
 
     <!-- controller  -->
     <div
-      class={`absolute bg-black/50 w-full p-3 h-full flex flex-col justify-end top-0 left-0 right-0 z-10 transition-opacity duration-1000 ${useNativePlayer ? "hidden" : ""}  ${isControllerShowing ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} `}
+      class={`absolute bg-black/50 w-full p-3 h-full flex flex-col justify-end top-0 left-0 right-0 z-10 transition-opacity duration-1000 ${useNativePlayer && "hidden"}  ${isControllerShowing ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} `}
     >
       <!-- controller buttons top  -->
       <div
@@ -260,18 +272,38 @@
         }}
       >
         <div
-          class={`top-[55%] left-[50%] -translate-x-[50%] -translate-y-[-55%] absolute ${loading ? "" : "hidden"}`}
+          class={`top-[55%] left-[50%] -translate-x-[50%] -translate-y-[-55%] absolute ${!loading && "hidden"}`}
         >
           {#if errorMessage}
             <p>{errorMessage}</p>
           {:else}
-            <p class="text-center">LOADING...</p>
+            <span>
+              <svg
+                class="mr-3 -ml-1 size-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                ><circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle><path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path></svg
+              >
+            </span>
+            <!-- <p class="text-center">LOADING...</p> -->
           {/if}
         </div>
       </div>
 
       <!-- controller buttons bottom  -->
-      <div class=" w-full grid gap-3 place-items-center p-3">
+      <div class=" w-full grid gap-3 place-items-center">
         <!-- current time and total time -->
         <div class="flex items-center justify-between w-full">
           <p>{duration.current}</p>
@@ -296,7 +328,7 @@
 
         <!-- button  -->
         <div class="w-full flex gap-2 items-center">
-          <div class="flex gap-2 items-center">
+          <div class="flex gap-4 items-center">
             <button aria-label="play/pause" onclick={togglePlay}>
               {#if isPlaying}
                 <svg
@@ -363,7 +395,43 @@
             </button>
           </div>
 
-          <div class="ml-auto">
+          <div class="ml-auto space-x-4">
+            <button aria-label="mute" onclick={mute}>
+              {#if muted}
+                <svg
+                  viewBox="0 0 24 24"
+                  width="29"
+                  height="29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
+                  ></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line
+                    x1="17"
+                    y1="9"
+                    x2="23"
+                    y2="15"
+                  ></line></svg
+                >
+              {:else}
+                <svg
+                  viewBox="0 0 24 24"
+                  width="29"
+                  height="29"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
+                  ></polygon><path
+                    d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"
+                  ></path></svg
+                >
+              {/if}
+            </button>
             <button aria-label="fullscreen" onclick={fullScreen}>
               <svg
                 viewBox="0 0 24 24"
@@ -385,24 +453,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  /* progress {
-    background-color: white;
-    -webkit-appearance: none;
-
-    accent-color: #eab305;
-  }
-
-  progress::-webkit-progress-bar {
-    background-color: white;
-  }
-
-  progress::-webkit-progress-value {
-    background-color: #eab305;
-  }
-
-  progress::-moz-progress-bar {
-    background-color: #eab305;
-  } */
-</style>
