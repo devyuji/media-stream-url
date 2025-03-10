@@ -196,6 +196,8 @@
 
     updateCurrentTime(calculateTime);
     updateProgressBar();
+
+    if (!isPlaying) videoElement.play();
   }
 
   function handleMouse() {
@@ -268,7 +270,9 @@
         class="w-full h-[90%] grid place-items-center relative"
         onclick={(e) => {
           e.stopPropagation();
-          togglePlay();
+          if (isControllerShowing) {
+            togglePlay();
+          }
         }}
       >
         <div
